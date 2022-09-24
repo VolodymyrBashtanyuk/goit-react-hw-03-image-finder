@@ -7,19 +7,35 @@ export class Searchbar extends Component {
   };
 
   handleChange = evt => {
-    this.setState({ searchName: evt.currentTarget.value });
+    const { value } = evt.currentTarget;
+    this.setState({
+      searchName: value,
+    });
   };
 
   handleSubmit = evt => {
+    const { searchName } = this.state;
+    const { onSubmit } = this.props;
+    const { reset } = this;
+
     evt.preventDefault();
-    this.props.onSubmit(this.state.searchName);
-    this.setState({ searchName: '' });
+    onSubmit(searchName);
+    reset();
+  };
+
+  reset = () => {
+    this.setState({
+      searchName: '',
+    });
   };
 
   render() {
+    const { handleSubmit, handleChange } = this;
+    const { searchName } = this.state;
+
     return (
       <header className="searchbar">
-        <form className="form" onSubmit={this.handleSubmit}>
+        <form className="form" onSubmit={handleSubmit}>
           <button type="submit" className="button">
             <ImSearch />
             Search
@@ -29,8 +45,8 @@ export class Searchbar extends Component {
             className="input"
             type="text"
             autoComplete="off"
-            onChange={this.handleChange}
-            value={this.state.searchName}
+            onChange={handleChange}
+            value={searchName}
             autoFocus
             placeholder="Search images and photos"
           />

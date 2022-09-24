@@ -1,9 +1,8 @@
-export const ImageGalleryItem = ({ items }) => {
-  console.log(items);
+export const ImageGalleryItem = ({ items, onOpen }) => {
   const imageList = items.map(({ tags, id, webformatURL }) => {
     return (
       <li key={id}>
-        <img src={webformatURL} alt={tags} />
+        <img onClick={onOpen} id={id} src={webformatURL} alt={tags} />
       </li>
     );
   });
