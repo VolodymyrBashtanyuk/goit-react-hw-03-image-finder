@@ -1,10 +1,16 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
+import { ButtonMore } from './ButtonStyled';
+import PropTypes from 'prop-types';
 
 export const Button = ({ onClick }) => {
   return (
-    <button type="button" onClick={onClick}>
+    <ButtonMore type="button" onClick={onClick}>
       Load more
       <FiMoreHorizontal />
-    </button>
+    </ButtonMore>
   );
+};
+
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
 };

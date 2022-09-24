@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { ImSearch } from 'react-icons/im';
+import { Header, Form, Button, Input } from './searchBarStyle';
 
 export class Searchbar extends Component {
   state = {
@@ -34,24 +35,25 @@ export class Searchbar extends Component {
     const { searchName } = this.state;
 
     return (
-      <header className="searchbar">
-        <form className="form" onSubmit={handleSubmit}>
-          <button type="submit" className="button">
+      <Header>
+        <Form onSubmit={handleSubmit}>
+          <Button type="submit">
             <ImSearch />
             Search
-          </button>
+          </Button>
 
-          <input
-            className="input"
-            type="text"
-            autoComplete="off"
-            onChange={handleChange}
-            value={searchName}
-            autoFocus
-            placeholder="Search images and photos"
-          />
-        </form>
-      </header>
+          <label>
+            <Input
+              type="text"
+              autoComplete="off"
+              onChange={handleChange}
+              value={searchName}
+              autoFocus
+              placeholder="Search images and photos"
+            />
+          </label>
+        </Form>
+      </Header>
     );
   }
 }

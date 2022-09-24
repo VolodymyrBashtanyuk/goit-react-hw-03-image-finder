@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { createPortal } from 'react-dom';
+import { Overlay, ModalOverlay } from './ModalStyle';
 
 const modalRoot = document.getElementById('modal-root');
 
@@ -7,17 +8,17 @@ export class Modal extends Component {
   state = {
     modalImage: {},
   };
+
   componentDidMount() {
     document.addEventListener('keydown', this.closeModal);
-  }
-
-  componentWillUnmount() {
-    console.log('ypaaa');
-    document.removeEventListener('keydown', this.closeModal);
     this.serchImage();
   }
 
-  componentDidUpdate(prevState, prevProps) {
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.closeModal);
+  }
+
+  componentDidUpdate(_, prevProps) {
     const { idImage } = this.props;
     if (prevProps.idImage !== idImage) {
     }
@@ -44,27 +45,12 @@ export class Modal extends Component {
     const { largeImageURL, tags } = this.state.modalImage;
 
     return createPortal(
-      <div onClick={this.closeModal} className="overlay">
-        <div className="modal">
-          <img onClick={this.closeModal} src={largeImageURL} alt={tags} />
-        </div>
-      </div>,
+      <Overlay onClick={this.closeModal}>
+        <ModalOverlay>
+          <img onClick={this.cModalOverlay} src={largeImageURL} alt={tags} />
+        </ModalOverlay>
+      </Overlay>,
       modalRoot
     );
   }
 }
-
-// = ({ data, onClose, idImage }) => {
-//   const serch = data.find(({ id }) => {
-//     return id === Number(idImage);
-//   });
-
-//   return createPortal(
-//     <div className="overlay">
-//       <div onClick={onClose} className="modal">
-//         <img src={serch.largeImageURL} alt={serch.tags} />
-//       </div>
-//     </div>,
-//     modalRoot
-//   );
-// };

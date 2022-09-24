@@ -13,6 +13,7 @@ export class FetchImage extends Component {
     loadButton: false,
     page: 1,
     error: null,
+    notification: '',
     modalOpen: false,
     id: 0,
   };
@@ -25,46 +26,66 @@ export class FetchImage extends Component {
       this.setState({
         load: true,
       });
-
-      ImagesApi(name, page)
-        .then(items => {
-          this.setState({
-            imageData: items,
-          });
-        })
-        .catch(error => {
-          this.setState({ error });
-        })
-        .finally(() => {
-          this.setState({
-            load: false,
-          });
-        });
+      this.fetchApi(name, page);
     } else if (this.state.page !== prevState.page) {
       this.setState({
         loadButton: true,
       });
-      ImagesApi(name, page)
-        .then(items => {
-          this.moreImages(items);
-        })
-        .catch(error => {
-          this.setState({ error });
-        })
-        .finally(() => {
-          this.setState({
-            loadButton: false,
-          });
-        });
+
+      this.fetchMoreButton(name, page);
     }
   }
 
-  fetchApi = () => {};
+  fetchApi = async (name, page) => {
+    try {
+      const api = await ImagesApi(name, page);
+      if (api.total === 0) {
+        this.noImages(name);
+        return;
+      }
+      const data = await api(
+        this.setState({
+          imageData: api.hits,
+        })
+      );
+      return data;
+    } catch (error) {
+      this.setState({
+        error,
+      });
+    } finally {
+      this.setState({
+        load: false,
+      });
+    }
+  };
+
+  fetchMoreButton = async (name, page) => {
+    try {
+      const apiMore = await ImagesApi(name, page);
+      const data = await apiMore(this.moreImages(apiMore.hits));
+      return data;
+    } catch (error) {
+      this.setState({
+        error,
+      });
+    } finally {
+      this.setState({
+        loadButton: false,
+      });
+    }
+  };
 
   loadMoreButton = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
+  };
+
+  noImages = name => {
+    this.setState({
+      notification: `Sorry no image with name ${name}`,
+    });
   };
 
   moreImages = data => {
@@ -87,31 +108,29 @@ export class FetchImage extends Component {
   };
 
   render() {
+    const { modalOpen, imageData, id, loadButton, load } = this.state;
+    const { closeModal, openModal, loadMoreButton } = this;
     return (
       <>
-        {this.state.modalOpen && (
-          <Modal
-            data={this.state.imageData}
-            onClose={this.closeModal}
-            idImage={this.state.id}
-          />
+        {modalOpen && (
+          <Modal data={imageData} onClose={closeModal} idImage={id} />
         )}
-        <Loader onLoad={this.state.load} />
-        {this.state.imageData.length !== 0 && (
+
+        {imageData.length !== 0 ? (
           <>
             <ImageGallery>
-              <ImageGalleryItem
-                items={this.state.imageData}
-                onOpen={this.openModal}
-              />
+              <ImageGalleryItem items={imageData} onOpen={openModal} />
             </ImageGallery>
             {this.state.loadButton ? (
-              <LoaderMoreButton load={this.state.loadButton} />
+              <LoaderMoreButton load={loadButton} />
             ) : (
-              <Button onClick={this.loadMoreButton} />
+              <Button onClick={loadMoreButton} />
             )}
           </>
+        ) : (
+          <Loader onLoad={load} />
         )}
+        {this.state.notification !== '' && <h1>{this.state.notification}</h1>}
       </>
     );
   }
