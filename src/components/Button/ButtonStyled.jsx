@@ -28,6 +28,4 @@ export const ButtonMore = styled.button`
   }
 `;
 
-export const LoaderButton = styled.div`
-  justify-content: center;
-`;
+

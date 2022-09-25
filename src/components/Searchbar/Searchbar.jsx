@@ -10,7 +10,7 @@ export class Searchbar extends Component {
   handleChange = evt => {
     const { value } = evt.currentTarget;
     this.setState({
-      searchName: value,
+      searchName: value.trim(),
     });
   };
 
@@ -20,7 +20,7 @@ export class Searchbar extends Component {
     const { reset } = this;
 
     evt.preventDefault();
-    onSubmit(searchName);
+    onSubmit(searchName.toLowerCase());
     reset();
   };
 
@@ -38,7 +38,7 @@ export class Searchbar extends Component {
       <Header>
         <Form onSubmit={handleSubmit}>
           <Button type="submit">
-            <ImSearch />
+            <ImSearch className="icon-serch" />
             Search
           </Button>
 

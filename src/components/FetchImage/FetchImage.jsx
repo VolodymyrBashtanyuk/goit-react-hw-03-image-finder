@@ -5,6 +5,7 @@ import { Button } from 'components/Button/Button';
 import { Loader, LoaderMoreButton } from 'components/Loader/Loader';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Modal } from 'components/Modal/Modal';
+import { NoteTitle, Container } from './FetchImageStyle';
 
 export class FetchImage extends Component {
   state = {
@@ -12,8 +13,7 @@ export class FetchImage extends Component {
     load: false,
     loadButton: false,
     page: 1,
-    error: null,
-    notification: '',
+    notification: false,
     modalOpen: false,
     id: 0,
   };
@@ -21,33 +21,29 @@ export class FetchImage extends Component {
   componentDidUpdate(prevProps, prevState) {
     const { page } = this.state;
     const { name } = this.props;
+    const { fetchApi } = this;
 
-    if (prevProps.name !== this.props.name) {
+    if (prevProps.name !== name && prevProps.name !== '') {
+      this.setState({
+        imageData: [],
+        notification: false,
+      });
+    }
+
+    if (prevProps.name !== name || page !== prevState.page) {
       this.setState({
         load: true,
-      });
-      this.fetchApi(name, page);
-    } else if (this.state.page !== prevState.page) {
-      this.setState({
         loadButton: true,
       });
-
-      this.fetchMoreButton(name, page);
+      fetchApi(name, page);
     }
   }
 
   fetchApi = async (name, page) => {
     try {
       const api = await ImagesApi(name, page);
-      if (api.total === 0) {
-        this.noImages(name);
-        return;
-      }
-      const data = await api(
-        this.setState({
-          imageData: api.hits,
-        })
-      );
+      const data = await api(this.moreImages(api.hits));
+
       return data;
     } catch (error) {
       this.setState({
@@ -56,21 +52,6 @@ export class FetchImage extends Component {
     } finally {
       this.setState({
         load: false,
-      });
-    }
-  };
-
-  fetchMoreButton = async (name, page) => {
-    try {
-      const apiMore = await ImagesApi(name, page);
-      const data = await apiMore(this.moreImages(apiMore.hits));
-      return data;
-    } catch (error) {
-      this.setState({
-        error,
-      });
-    } finally {
-      this.setState({
         loadButton: false,
       });
     }
@@ -82,13 +63,13 @@ export class FetchImage extends Component {
     }));
   };
 
-  noImages = name => {
-    this.setState({
-      notification: `Sorry no image with name ${name}`,
-    });
-  };
-
   moreImages = data => {
+    if (data.length === 0) {
+      this.setState({
+        notification: true,
+      });
+      return;
+    }
     this.setState(prevState => {
       return {
         imageData: [...prevState.imageData, ...data],
@@ -96,10 +77,9 @@ export class FetchImage extends Component {
     });
   };
 
-  openModal = evt => {
-    if (evt.currentTarget === evt.target) {
-      this.setState({ modalOpen: true });
-      this.setState({ id: evt.currentTarget.id });
+  openModal = ({ currentTarget, target }) => {
+    if (currentTarget === target) {
+      this.setState({ modalOpen: true, id: currentTarget.id });
     }
   };
 
@@ -108,8 +88,11 @@ export class FetchImage extends Component {
   };
 
   render() {
-    const { modalOpen, imageData, id, loadButton, load } = this.state;
+    const { modalOpen, imageData, id, loadButton, load, notification } =
+      this.state;
     const { closeModal, openModal, loadMoreButton } = this;
+    const { name } = this.props;
+
     return (
       <>
         {modalOpen && (
@@ -121,7 +104,7 @@ export class FetchImage extends Component {
             <ImageGallery>
               <ImageGalleryItem items={imageData} onOpen={openModal} />
             </ImageGallery>
-            {this.state.loadButton ? (
+            {loadButton ? (
               <LoaderMoreButton load={loadButton} />
             ) : (
               <Button onClick={loadMoreButton} />
@@ -130,7 +113,11 @@ export class FetchImage extends Component {
         ) : (
           <Loader onLoad={load} />
         )}
-        {this.state.notification !== '' && <h1>{this.state.notification}</h1>}
+        {notification && (
+          <NoteTitle>
+            Sorry :( no image with name <Container>{name}</Container>
+          </NoteTitle>
+        )}
       </>
     );
   }

@@ -6,7 +6,7 @@ export const Button = ({ onClick }) => {
   return (
     <ButtonMore type="button" onClick={onClick}>
       Load more
-      <FiMoreHorizontal />
+      <FiMoreHorizontal className="dots" />
     </ButtonMore>
   );
 };
