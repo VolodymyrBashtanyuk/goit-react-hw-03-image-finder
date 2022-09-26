@@ -47,7 +47,7 @@ export class Modal extends Component {
     return createPortal(
       <Overlay onClick={this.closeModal}>
         <ModalOverlay>
-          <Img onClick={this.cModalOverlay} src={largeImageURL} alt={tags} />
+          <Img src={largeImageURL} alt={tags} />
         </ModalOverlay>
       </Overlay>,
       modalRoot

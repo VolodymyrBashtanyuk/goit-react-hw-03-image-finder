@@ -14,10 +14,11 @@ export class App extends Component {
   render() {
     const { imageName } = this.state;
     const { imageFormSubmit } = this;
+
     return (
       <>
         <Searchbar onSubmit={imageFormSubmit} />
-        <FetchImage name={imageName} />
+        {imageName !== '' && <FetchImage name={imageName} />}
       </>
     );
   }

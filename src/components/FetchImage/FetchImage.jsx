@@ -3,7 +3,6 @@ import { ImagesApi } from 'services/ImagesApi';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
 import { Button } from 'components/Button/Button';
 import { Loader, LoaderMoreButton } from 'components/Loader/Loader';
-import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Modal } from 'components/Modal/Modal';
 import { NoteTitle, Container } from './FetchImageStyle';
 
@@ -18,32 +17,50 @@ export class FetchImage extends Component {
     id: 0,
   };
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidMount() {
     const { page } = this.state;
     const { name } = this.props;
     const { fetchApi } = this;
 
-    if (prevProps.name !== name && prevProps.name !== '') {
+    this.setState({
+      load: true,
+    });
+
+    fetchApi(name, page);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { page } = this.state;
+    const { name } = this.props;
+    const { nextPageApi } = this;
+
+    // for  new search update
+    if (prevProps.name !== name) {
       this.setState({
         imageData: [],
+        page: 1,
+        load: true,
         notification: false,
       });
     }
 
-    if (prevProps.name !== name || page !== prevState.page) {
+    if (page !== prevState.page) {
       this.setState({
-        load: true,
         loadButton: true,
+        notification: false,
       });
-      fetchApi(name, page);
+      nextPageApi(name, page);
     }
   }
 
   fetchApi = async (name, page) => {
     try {
       const api = await ImagesApi(name, page);
-      const data = await api(this.moreImages(api.hits));
-
+      const data = await api(
+        this.setState({
+          imageData: api.hits,
+        })
+      );
       return data;
     } catch (error) {
       this.setState({
@@ -52,6 +69,23 @@ export class FetchImage extends Component {
     } finally {
       this.setState({
         load: false,
+      });
+    }
+  };
+
+  nextPageApi = async (name, page) => {
+    try {
+      const api = await ImagesApi(name, page);
+      const data = await api(this.moreImages(api.hits));
+      return data;
+    } catch (error) {
+      this.setState({
+        error,
+      });
+    } finally {
+      this.setState({
+        load: false,
+
         loadButton: false,
       });
     }
@@ -67,6 +101,7 @@ export class FetchImage extends Component {
     if (data.length === 0) {
       this.setState({
         notification: true,
+        page: 2,
       });
       return;
     }
@@ -101,9 +136,7 @@ export class FetchImage extends Component {
 
         {imageData.length !== 0 ? (
           <>
-            <ImageGallery>
-              <ImageGalleryItem items={imageData} onOpen={openModal} />
-            </ImageGallery>
+            <ImageGallery items={imageData} onOpen={openModal} />
             {loadButton ? (
               <LoaderMoreButton load={loadButton} />
             ) : (
@@ -113,6 +146,7 @@ export class FetchImage extends Component {
         ) : (
           <Loader onLoad={load} />
         )}
+
         {notification && (
           <NoteTitle>
             Sorry :( no image with name <Container>{name}</Container>
